@@ -12,6 +12,7 @@ const internshipApplyCount = 10;
     const email = process.env.EMAIL;
     const pwd = process.env.PASSWORD;
     const internshipsUrl = "https://internshala.com/internships/software-development-internship/";
+    const coverLetterText = process.env.COVER_LETTER;
 
     // Start browser
     const browser = await puppeteer.launch({
@@ -72,17 +73,55 @@ const internshipApplyCount = 10;
     await tab.click(".btn.btn-large.education_incomplete.proceed-btn");
     console.log("application btn clicked");
 
-    // Wait for the new page to open
-    const newTarget = await new Promise(resolve => browser.once('targetchanged', resolve));
-    const newPage = await newTarget.page();
-
     // Wait for the new page to load
-    await newPage.waitForNavigation({ waitUntil: 'networkidle2' });
+    await tab.waitForNavigation({ waitUntil: 'networkidle2' });
 
     // Perform actions on the new page if necessary
     console.log("New page opened after clicking application button.");
 
+    // Wait for the cover letter holder (clickable area) to be visible and click to activate the textarea
+    await tab.waitForSelector("#cover_letter_holder", { visible: true });
+    await tab.click("#cover_letter_holder");
+    console.log("Clicked to activate the cover letter textarea.");
+
+    // Wait for the textarea to become visible after activation
+    await tab.waitForSelector("#cover_letter_holder", { visible: true });
+
+    // Select the first textarea element
+    let coverLetterHolder = await tab.$("#cover_letter_holder");
+
+    // Fill the cover letter
+    await coverLetterHolder.type(coverLetterText, { delay: 50 });
+
+        // Wait for the checkbox to be visible
+    await tab.waitForSelector("#check", { visible: true });
+
+    // Check the checkbox (tick it)
+    await tab.click("#check");
+
+    console.log("Checkbox ticked successfully!");
+
+    console.log("Cover letter filled successfully!");
+    
+//     // Click the upload icon to trigger the file upload dialog
+// await tab.waitForSelector(".ic-24-upload", { visible: true });
+// await tab.click(".ic-24-upload");
+// console.log("Upload icon clicked");
+
+// // Wait for the file input to be visible and upload the file
+// // Use the absolute path of your file on the local file system
+// const resumePath = 'D:/Office/Resume (2).pdf'; // Absolute path without file:/// scheme
+// await tab.waitForSelector("#custom_resume", { visible: true });
+// const inputElement = await tab.$("#custom_resume");
+// await inputElement.uploadFile(resumePath);
+
+// console.log("Resume uploaded successfully!");
+
+ // Click the submit button
+ await tab.waitForSelector("#submit", { visible: true });
+ await tab.click("#submit");
+ console.log("Submit button clicked");
+
+
     await browser.close();
 })();
-
-
